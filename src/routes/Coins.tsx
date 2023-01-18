@@ -68,7 +68,10 @@ interface CoinInterface {
 function Coins(){
 
   const {isLoading, data} = useQuery<CoinInterface[]>("allCoins", fetchCoins);
+  // 타입스크립트에게 무엇이 data인지 설명해줘야 하기 때문에 <CoinInterface[]>를 넣었다.
 
+
+  /* react-query를 사용하지 않은 예전 방식 */
   // const [coins, setCoins] = useState<CoinInterface[]>([]); 
   // const [Loading, setLoading] = useState(true);
   // useEffect(() => {
@@ -80,6 +83,7 @@ function Coins(){
   //   })();
   // }, [])
 
+
   return (
     <Container>
       <Header>
@@ -87,7 +91,7 @@ function Coins(){
       </Header>
       {isLoading ? <Loader>"Loading..."</Loader> : (
         <CoinList>
-          {data?.map(coin => // data는 array 또는 undefined이다. 그래서 이 문제를 해결하려면 data 뒤에 ?를 붙인다.
+          {data?.slice(0,100).map(coin => // data는 array 또는 undefined이다. 그래서 이 문제를 해결하려면 data 뒤에 ?를 붙인다.
             <Coin key={coin.id}>
               {/* <Link to={`/${coin.id}`}> */}
               <Link to={{

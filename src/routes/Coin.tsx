@@ -3,6 +3,9 @@ import styled from "styled-components";
 import { useEffect, useState } from 'react';
 import Chart from "./Chart";
 import Price from "./Price";
+import { useQuery } from 'react-query';
+import { fetchCoinInfo, fetchCoinTickers } from "../api";
+
 
 const Container = styled.div`
   padding: 20px 40px;
@@ -151,9 +154,19 @@ function Coin(){
   // const [info, setInfo] = useState<InfoData>();
   // const [priceInfo, setPriceInfo] = useState<PriceData>();
   const priceMatch = useRouteMatch("/:coinId/price");
-  console.log(priceMatch)
   const chartMatch = useRouteMatch("/:coinId/chart");
 
+  const {isLoading:infoLoading, data:infoData} = useQuery<InfoData>(["info",coinId], ()=> fetchCoinInfo(coinId));
+  const {isLoading:tickersLoading, data:tickersData} = useQuery<PriceData>(["tickers",coinId], ()=> fetchCoinTickers(coinId));
+  //useQuery를 구분하는 "키"는 고유한 값이어야 하므로 coinId를 "키"로 사용했다. 
+  //그리고 useQuery가 두 개이기 때문에 구분짓기 위해서 "키" 부분을 배열로 만들어서 작명한 string값과 coinId 둘 다 넣어준 것이다.
+  //argument가 필요하기 때문에 함수명이 아니라 ()=>{} 이렇게 화살표 함수 형식으로 넣었다.
+  //그리고 타입스크립트에게 무엇이 data:infoData 이고, 무엇이 data:tickersData인지 설명해줘야 한다. 그래서 <InfoData>, <PriceData> 이런거 넣은 것이다.
+
+  const loading = infoLoading || tickersLoading;
+
+
+  /* react-query를 사용하지 않은 예전 방식 */
   // useEffect(()=>{
   //   (async()=>{
   //     const infoData = await (
@@ -176,11 +189,13 @@ function Coin(){
   // },[coinId])
   
 
+
+
   return (
     <Container>
       <Header>
         <Title>
-          {state?.name ? state.name : loading ? "Loading..." : info?.name}
+          {state?.name ? state.name : loading ? "Loading..." : infoData?.name}
           {/* 메인페이지에서 코인목록 하나를 클릭해서 이 페이지로 들어오면 useLocation을 통해 메인페이지에서 이미 한 번 불러왔던 데이터에서 state.name을 불러오게 된다. 그런데 메인페이지가 아니라 url을 통해 이 페이지에 들어오게 되면, 메인페이지를 거치지 않기 때문에 이 페이지에서 새롭게 불러온 데이터를 통해서 info.name을 불러오게 된다. */}
         </Title>
       </Header>
@@ -191,26 +206,26 @@ function Coin(){
           <Overview>
             <OverviewItem>
               <span>Rank:</span>
-              <span>{info?.rank}</span>
+              <span>{infoData?.rank}</span>
             </OverviewItem>
             <OverviewItem>
               <span>Symbol:</span>
-              <span>${info?.symbol}</span>
+              <span>${infoData?.symbol}</span>
             </OverviewItem>
             <OverviewItem>
               <span>Open Source:</span>
-              <span>{info?.open_source ? "Yes" : "No"}</span>
+              <span>{infoData?.open_source ? "Yes" : "No"}</span>
             </OverviewItem>
           </Overview>
-          <Description>{info?.description}</Description>
+          <Description>{infoData?.description}</Description>
           <Overview>
             <OverviewItem>
               <span>Total Suply:</span>
-              <span>{priceInfo?.total_supply}</span>
+              <span>{tickersData?.total_supply}</span>
             </OverviewItem>
             <OverviewItem>
               <span>Max Supply:</span>
-              <span>{priceInfo?.max_supply}</span>
+              <span>{tickersData?.max_supply}</span>
             </OverviewItem>
           </Overview>
 
