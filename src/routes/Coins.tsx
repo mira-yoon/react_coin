@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import {Link} from "react-router-dom";
 import { useState, useEffect } from 'react';
+import { useQuery } from 'react-query';
+import { fetchCoins } from "../api";
 
 
 const Container = styled.div`
@@ -65,31 +67,27 @@ interface CoinInterface {
 
 function Coins(){
 
-  const [coins, setCoins] = useState<CoinInterface[]>([]); 
-  // <CoinInterface[]> 이렇게 써 줌으로써 coin State 는 coins로 이루어진 배열이라고 알려주는 것이다.
+  const {isLoading, data} = useQuery<CoinInterface[]>("allCoins", fetchCoins);
 
-  const [Loading, setLoading] = useState(true);
-
-
-  useEffect(() => {
-    // (()=> console.log(1))(); 이런 함수는 바로 실행이 된다.
-
-    (async()=>{
-      const response = await fetch("https://api.coinpaprika.com/v1/coins");
-      const json = await response.json();
-      setCoins(json.slice(0,100));
-      setLoading(false)
-    })();
-  }, [])
+  // const [coins, setCoins] = useState<CoinInterface[]>([]); 
+  // const [Loading, setLoading] = useState(true);
+  // useEffect(() => {
+  //   (async()=>{
+  //     const response = await fetch("https://api.coinpaprika.com/v1/coins");
+  //     const json = await response.json();
+  //     setCoins(json.slice(0,100));
+  //     setLoading(false)
+  //   })();
+  // }, [])
 
   return (
     <Container>
       <Header>
         <Title>Coin</Title>
       </Header>
-      {Loading ? <Loader>"Loading..."</Loader> : (
+      {isLoading ? <Loader>"Loading..."</Loader> : (
         <CoinList>
-          {coins.map(coin => 
+          {data?.map(coin => // data는 array 또는 undefined이다. 그래서 이 문제를 해결하려면 data 뒤에 ?를 붙인다.
             <Coin key={coin.id}>
               {/* <Link to={`/${coin.id}`}> */}
               <Link to={{
